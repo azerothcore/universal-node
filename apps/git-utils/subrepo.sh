@@ -16,11 +16,9 @@ function subrepoUpdate() {
     branch=$2
     folder=$3
 
-    mkdir -p "$(dirname "$folder")"
-
     # try-catch
     set +e
-    git subrepo init "$folder" -r "$repo" -b "$branch"
+    git subrepo clone "$repo" "$folder" -b "$branch"
     set -e
 
     git subrepo clean "$folder"
