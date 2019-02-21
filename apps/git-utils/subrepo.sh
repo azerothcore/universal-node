@@ -1,6 +1,8 @@
 
 #!/usr/bin/env bash
 
+
+
 CUR_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/"
 
 source "$CUR_PATH/../git-subrepo/.rc"
@@ -14,7 +16,11 @@ function subrepoUpdate() {
     branch=$2
     folder=$3
 
+    # try-catch
+    set +e
     git subrepo init "$folder" -r "$repo" -b "$branch"
+    set -e
+
     git subrepo clean "$folder"
     git subrepo pull "$folder"
     git subrepo push "$folder" -s
