@@ -1,7 +1,3 @@
-import sqs from "sequelize-graphql-schema/src/sequelize-graphql-schema";
-
-
-
 import {
     GraphQLString,
     GraphQLInputObjectType
@@ -10,12 +6,7 @@ import {
     GraphQLUpload
 } from 'apollo-server-express';
 
-import {
-    rootTypeDef
-} from "@this/src/system/graphScheme"
-
-const _export=sqs({
-    remote: rootTypeDef,
+export default {
     customTypes: {
         "Upload": GraphQLUpload,
         "pictureType": GraphQLString,
@@ -33,6 +24,4 @@ const _export=sqs({
             }
         })
     }
-});
-
-export default _export;
+}

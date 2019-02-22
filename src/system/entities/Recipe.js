@@ -4,7 +4,7 @@ import {
     applyMiddlewares,
     uploadFile,
     ownDataFilter
-} from "@this/src/system/apiHelpers";
+} from "@hw-core/node-platform/src/libs/apiHelpers";
 const reference_folder = "upload/recipes/";
 
 /**

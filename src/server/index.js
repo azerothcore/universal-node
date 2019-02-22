@@ -1,17 +1,9 @@
 // !!!DO NOT EDIT!!!
-// this file is the bootstrap code
-// that allows,  together with .babelrc, import/export ES6 syntax
-// working on nodejs via babel.
-// Waiting for full nodejs support.
+// this file is the bootstrap code for server
 
-require("../../apps/installer/installer")
+require("../../apps/installer/installer") // cannot use module alias here
 
-require('dotenv').config();
-
-require('module-alias/register');
-
-require("@babel/register")({})
-
+require("./boot")
 
 // Import the rest of our application.
-module.exports = require('./server.js')
+module.exports = require('./master.js')

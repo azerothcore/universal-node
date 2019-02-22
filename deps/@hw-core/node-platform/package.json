@@ -1,28 +1,14 @@
 {
-  "name": "hw-universal-node",
+  "name": "@hw-core/node-platform",
   "version": "1.0.0",
-  "description": "Boilerplate for Universal NodeJS server",
-  "main": "src/server/index.js",
+  "description": "Shared libraries for nodejs projects",
   "author": "hyperweb2",
   "license": "MIT",
-  "scripts": {
-    "db:create": "npm run installer && sequelize db:create",
-    "db:migrate": "sequelize db:migrate",
-    "db:seed": "sequelize db:seed:all",
-    "db:sync": "node --preserve-symlinks ./src/server/index.js --db-sync",
-    "db:all": "npm run db:create && npm run db:sync && npm run db:seed",
-    "start": "nodemon --preserve-symlinks ./src/server/index.js",
-    "start:noauth": "npm run start -- --no-auth",
-    "start:screen": "screen -dmS hw-universal-node npm start",
-    "stop:screen": "screen -X -S hw-universal-node quit",
-    "installer": "node ./apps/installer/installer.js",
-    "postinstall": "node ./apps/installer/post-install.js"
-  },
+  "main" : "./index.js",
   "dependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3",
     "@babel/register": "^7.0.0",
-    "@hw-core/node-platform": "file:./deps/@hw-core/node-platform",
     "apollo-boost": "^0.1.22",
     "apollo-server": "^2.3.1",
     "apollo-server-express": "^2.3.1",
@@ -51,12 +37,11 @@
     "sequelize": "^4.41.2",
     "sequelize-auto-import": "^1.1.0",
     "sequelize-cli": "^5.4.0",
-    "sequelize-graphql-schema": "file:./deps/sequelize-graphql-schema",
+    "sequelize-graphql-schema": "file:../../sequelize-graphql-schema",
     "sha1": "^1.1.1",
     "stream-to-array": "^2.3.0"
   },
   "_moduleAliases": {
-    "@this": ".",
-    "@hw-core": "deps/@hw-core"
+    "@hw-core/node-platform" : "."
   }
 }

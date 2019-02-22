@@ -1,9 +1,8 @@
 const https = require('https')
-import config from "@this/conf/conf.js"
 
-export function verify(clientKey) {
+export function verify(clientKey, catpchaKey) {
   const data = JSON.stringify({
-    secret: config.captchaKey, //The shared key between your site and reCAPTCHA.
+    secret: catpchaKey, //The shared key between your site and reCAPTCHA.
     response: clientKey, //The user response token provided by the reCAPTCHA client-side integration on your site.
   })
 

@@ -4,8 +4,7 @@ import {
     applyMiddlewares,
     uploadFile,
     sameUser
-} from "@this/src/system/apiHelpers";
-import { Where } from "sequelize/lib/utils";
+} from "@hw-core/node-platform/src/libs/apiHelpers";
 
 const reference_folder = "upload/feedbacks/";
 

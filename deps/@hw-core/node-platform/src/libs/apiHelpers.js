@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import config from "@this/conf/conf";
 import bcrypt from 'bcrypt';
 
 import toArray from 'stream-to-array';
@@ -34,14 +33,14 @@ function getToken(req) {
     }
 }
 
-export function verifyToken(req) {
+export function verifyToken(req, secret) {
     let token = getToken(req);
 
     if (!token) {
         return null;
     }
 
-    return jwt.verify(token, config.secret, (err, decoded) => {
+    return jwt.verify(token, secret, (err, decoded) => {
         if (err) throw new Error('Fail to Authentication. Error -> ' + err);
 
         return decoded;

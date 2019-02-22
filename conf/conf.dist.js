@@ -4,8 +4,20 @@ export default {
     clientPort: 3000,
     secret: "&$fx#W*!aRlh^LvfYA",
     captchaKey: "replace_key_here",
-    email_user: "",
-    email_password: "",
-    email_service: "gmail",
-    email_port: 993
+    express: {
+        useCors: true,
+        bodyParser: {
+            json: {
+                limit: '1mb'
+            }
+        }
+    },
+    mailer: {
+        service: "gmail",
+        port: 993,
+        auth: {
+            user: "",
+            pass: ""
+        }
+    }
 }

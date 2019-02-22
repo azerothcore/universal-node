@@ -6,18 +6,18 @@ import {
     applyMiddlewares,
     uploadFile,
     random
-} from "@this/src/system/apiHelpers";
+} from "@hw-core/node-platform/src/libs/apiHelpers";
 
 import bcrypt from 'bcrypt';
 
 import config from "@this/conf/conf.js"
 import jsonwebtoken from 'jsonwebtoken';
 import {
-    sendConfirmation,
-    sendRecovery,
-    sendPassword
-} from "@this/src/system/mailer";
-import app from "@this/src/server/express";
+    Mailer
+} from "@hw-core/node-platform";
+import { server } from "@this/src/server/server";
+
+const reference_folder = "upload/users"
 
 /**
  * @instance
@@ -25,6 +25,8 @@ import app from "@this/src/server/express";
  * @param {Sequelize} DataTypes 
  */
 export default function (sequelize, DataTypes) {
+    const mailer = new Mailer(config.mailer)
+    const app = server.hwApolloServer.expressApp;
 
     /** @type {Sequelize.Model} */
     var User = sequelize.define('User', {
@@ -158,7 +160,7 @@ export default function (sequelize, DataTypes) {
         },
         extend: {
             create: async (obj, data, context, info) => {
-                return sendConfirmation(obj.activationToken, obj.email);
+                return mailer.sendConfirmation(obj.activationToken, obj.email);
             }
         },
         mutations: {
@@ -218,7 +220,7 @@ export default function (sequelize, DataTypes) {
                         }
                     });
 
-                    sendRecovery(user.recoveryToken, user.email);
+                    mailer.sendRecovery(user.recoveryToken, user.email);
                     return {
                         message: "Done"
                     };
@@ -290,7 +292,7 @@ export default function (sequelize, DataTypes) {
         } catch (error) {
             console.log(error);
         }
-        sendPassword(newPass, user.email);
+        mailer.sendPassword(newPass, user.email);
         return res.send(prefix + " A new temporary password has been sent to your email" + suffix);
     });
 

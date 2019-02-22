@@ -4,8 +4,8 @@
         "allowSyntheticDefaultImports": true,
         "baseUrl": ".",
         "paths": {
-            "@this/src/*": ["./src/*"],
-            "@this/conf/*": ["./conf/*"],
+            "@this/*": ["./*"],
+            "@hw-core/*": ["./deps/@hw-core/*"],
         },
         "module": "commonjs"
     },
