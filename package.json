@@ -1,5 +1,5 @@
 {
-  "name": "hw-universal-node",
+  "name": "@hw-core/universal-node",
   "version": "1.0.0",
   "description": "Boilerplate for Universal NodeJS server",
   "main": "src/server/index.js",
