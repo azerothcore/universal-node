@@ -102,6 +102,20 @@ const whereQueryVarsToValues = (o, vals) => {
   });
 }
 
+/**
+ * @typedef Name
+ * @property {string} singular
+ * @property {string} plural 
+ */
+
+/**
+ * @param {Name} name
+ * @returns string
+ */
+const assocSuffix = (model, plural = false) => {
+  return _.upperFirst(plural && !model.options.freezeTableName ? model.options.name.plural : model.options.name.singular);
+}
+
 const remoteResolver = async (source, args, context, info, remoteQuery, remoteArguments, type) => {
 
   const availableArgs = _.keys(remoteQuery.args);
@@ -253,7 +267,7 @@ const mutationResolver = async (model, inputTypeName, source, args, context, inf
 
   var data = {};
 
-  const operation = async function (opType, _model, _source, _args, name, assocInst, sourceInst, transaction) {
+  const operation = async function (opType, _model, _source, _args, name, assocInst, sourceInst, transaction, toDestroy = null) {
     let hookType = opType == "set" ? "update" : type;
 
     if (_model.graphql && _model.graphql.overwrite.hasOwnProperty(hookType)) {
@@ -277,13 +291,15 @@ const mutationResolver = async (model, inputTypeName, source, args, context, inf
 
     let res;
     if (opType == "add" || opType == "set") {
-      let _op;
+      let _op, _name ;
       if (_source.through && _source.through.model) {
         delete _args[name][_source.target.name];
         delete _args[name][_source.foreignIdentifierField];
-        _op = opType + _source.target.name;
+        _name = assocSuffix(_source.target, ["BelongsTo", "HasOne"].indexOf(_source.associationType) < 0);
+        _op = opType + _name;
       } else {
-        _op = opType + _model.name;
+        _name = assocSuffix(_model, ["BelongsTo", "HasOne"].indexOf(_source.associationType) < 0);
+        _op = opType + _name;
       }
 
       res = await sourceInst[_op](assocInst, opType == "add" ? {
@@ -295,15 +311,18 @@ const mutationResolver = async (model, inputTypeName, source, args, context, inf
       return await finalize(res);
 
     } else {
-      res = await _model[opType](type === 'destroy' ? {
-        where
+      // allow destroy on instance if specified
+      let _inst = toDestroy && opType == 'destroy' ? toDestroy : _model;
+      res = await _inst[opType](opType === 'destroy' ? {
+        where,
+        transaction
       } : _args[name], {
         where,
         validate,
         transaction
       });
 
-      if (opType != "create")
+      if (opType != "create" && opType != "destroy")
         return await finalize(await _model.findOne({
           where, transaction
         }))
@@ -342,7 +361,7 @@ const mutationResolver = async (model, inputTypeName, source, args, context, inf
               [aModel.target.name]: crObj,
               transaction
             }
-            let node = await operation("create", aModel.target, _model, _at, aModel.target.name, {}, _sourceInst, transaction);
+            let node = await operation("create", aModel.target, _model, _at, aModel.target.name, null, _sourceInst, transaction);
             let data = await operation("add", _model, aModel, _a, name, node, _sourceInst, transaction);
             let edge = data[0][0];
             edge[aModel.target.name] = node;
@@ -357,7 +376,7 @@ const mutationResolver = async (model, inputTypeName, source, args, context, inf
           }
         } else {
           const _model = aModel.target
-          let newInst = await operation("create", _model, aModel.target, _a, aModel.target.name, {}, _sourceInst, transaction);
+          let newInst = await operation("create", _model, aModel.target, _a, name, {}, _sourceInst, transaction);
           return await operation("set", _model, aModel, _a, name, newInst, _sourceInst, transaction);
         }
       }
@@ -374,8 +393,28 @@ const mutationResolver = async (model, inputTypeName, source, args, context, inf
         _data[name] = []
 
         if (args["set"] == true) {
-          let _op = "set" + (_source.through && _source.through.model ? _source.target.name : aModel.target.name)+"s";
-          await _sourceInst[_op]([],{transaction});
+          let _refModel = _source.through && _source.through.model ? _source.target : aModel.target;
+          let _name = assocSuffix(_refModel, true);
+          if (aModel.associationType === 'HasMany' || aModel.associationType === 'HasOne') {
+            // we cannot use set() to remove because of a bug: https://github.com/sequelize/sequelize/issues/8588
+            let _getOp = "get" + _name;
+            let assoc = await _sourceInst[_getOp]({
+              transaction
+            });
+            if (assoc) {
+              if (_.isArray(assoc)) {
+                for (var k in assoc) {
+                  var v = assoc[k];
+                  await operation("destroy", aModel.target, _source, [], null, null, _sourceInst, transaction, v)
+                }
+              } else {
+                await operation("destroy", aModel.target, _source, [], null, null, _sourceInst, transaction, v)
+              }
+            }
+          } else {
+            let _op = "set" + _name;
+            await _sourceInst[_op]([],{transaction});
+          }
         }
 
         for (let p in _args[name]) {
@@ -643,8 +682,9 @@ const generateAssociationFields = (model, associations, types, cache, isInput = 
       const attr = rawAttributes[key];
       if (attr && attr.references) {
           const modelName = attr.references.model;
-          const refModel=model.sequelize.modelManager.getModel(modelName, {attribute: "tableName"});
-          buildAssoc(refModel, refModel, "BelongsTo", refModel.name, true);
+          const assocModel = model.sequelize.modelManager.getModel(modelName, {attribute: "tableName"});
+          const reference = model.associations[assocModel.name] ? model.associations[assocModel.name] : assocModel;
+          buildAssoc(assocModel, reference, "BelongsTo", reference.name, true);
       }
   }
 
