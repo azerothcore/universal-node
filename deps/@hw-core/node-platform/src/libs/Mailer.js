@@ -1,16 +1,17 @@
 var nodemailer = require("nodemailer");
+var conf = require("@this/conf/conf");
 
 export default class Mailer {
-    constructor(conf) {
-        this.transporter = nodemailer.createTransport(conf);
+    constructor(config) {
+        this.transporter = nodemailer.createTransport(config);
 
         Object.freeze(this.transporter);
     }
 
     //change name of function sendMail in sendConfirmation
-    sendConfirmation(_activationToken, _email) {
+    sendConfirmation(_activationToken, _email, _id) {
         try {
-            const url = `http://${conf.host}:${conf.serverPort}/activation/${_email}/${_activationToken}`;
+            const url = `http://${conf.host}:${conf.clientPort}/activation/${_id}/${_activationToken}`;
 
             let mailOptions = {
                 subject: 'Confirmation Email',
@@ -19,7 +20,7 @@ export default class Mailer {
                 html: `Hello, please click this <a href=${url}>confirmation link</a> to activate your account!`
             };
 
-            return transporter.sendMail(mailOptions, (error, response) => {
+            return this.transporter.sendMail(mailOptions, (error, response) => {
                 if (error) {
                     console.log(error + "\n");
                 } else {
@@ -34,7 +35,7 @@ export default class Mailer {
 
     sendRecovery(_recoveryToken, _email) {
         try {
-            const url = `http://${conf.host}:${conf.serverPort}/pass_recover/${_email}/${_recoveryToken}`;
+            const url = `http://${conf.host}:${conf.clientPort}/pass_recover/${_email}/${_recoveryToken}`;
 
             let mailOptions = {
                 subject: 'Recovery password',
@@ -43,7 +44,7 @@ export default class Mailer {
                 html: `Hello, please click this <a href=${url}>confirmation link</a> to change password for your account!`
             };
 
-            return transporter.sendMail(mailOptions, (error, response) => {
+            return this.transporter.sendMail(mailOptions, (error, response) => {
                 if (error) {
                     console.log(error + "\n");
                 } else {
@@ -67,7 +68,7 @@ export default class Mailer {
                 html: `Hello, this is the new password <strong>${pass}</strong> for your account!`
             };
 
-            return transporter.sendMail(mailOptions, (error, response) => {
+            return this.transporter.sendMail(mailOptions, (error, response) => {
                 if (error) {
                     console.log(error + "\n");
                 } else {

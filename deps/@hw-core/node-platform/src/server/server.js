@@ -43,6 +43,9 @@ import * as sysUtil from "../libs/sysUtil"
 
 import HwApolloServer from "./apollo-express";
 
+const defaultOptions = {
+}
+
 
 export default class Server {
     /**
@@ -50,12 +53,12 @@ export default class Server {
      * @param {Object} conf 
      * @param {string} name 
      */
-    constructor(conf, name = "hw-node-platform") {
+    constructor(conf, name = "hw-node-platform", options = defaultOptions) {
         this.conf = conf;
 
         this.evtMgr = new EventManager(Events, name)
 
-        this.hwApolloServer = new HwApolloServer(conf, this.evtMgr);
+        this.hwApolloServer = new HwApolloServer(conf, this.evtMgr, options);
         /**@type {Db} */
         this.db = null;
 

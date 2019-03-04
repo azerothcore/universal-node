@@ -1,3 +1,4 @@
+import "../defs"
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
 
@@ -8,17 +9,9 @@ import base64ToImage from 'base64-to-image';
 
 import * as sys from "./sysUtil"
 
-export const ROLES = {
-    ROLE_USER: 0,
-    ROLE_ADMIN: 1
-}
-
 const srvfolder = "srv/";
 const validMimeType = ['image/jpeg', 'image/png', 'image/tiff', 'image/webp'];
 
-function checkLevel(user, levels) {
-    return levels.indexOf(user.role) >= 0;
-}
 
 function getToken(req) {
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') { // Authorization: Bearer g1jipjgi1ifjioj
@@ -47,64 +40,18 @@ export function verifyToken(req, secret) {
     });
 }
 
-export function ownDataFilter(models, relModel, userKey, relKey) {
-    return async function (obj, data, context, info) {
-        let id = data.where ? data.where.id : data.id;
-
-        if (sys.noAuth || checkLevel(context.user, [ROLES.ROLE_ADMIN]))
-            return Promise.resolve();
-
-        if (!id) {
-            if (obj && obj.constructor.name == relModel && obj[relKey])
-                id=obj[relKey];
-            else
-                return Promise.reject("You cannot see all data of this query, use a specific id!");
-        }
-
-        let res = await models[relModel].findOne({
-            where: {
-                [userKey]: context.user.id,
-                [relKey]: id
-            }
-        });
-
-        if (!res)
-            return Promise.reject("This element is not for you!");
-
-        return Promise.resolve();
-    }
-}
 /**
- * Middleware for SequelizeGraphql scheme
- *
- * @async
- * @callback SGSMiddleware
- * @param {Object} obj
- * @param {Object} data
- * @param {Object} context
- * @param {Object} info
- * @returns {Promise} Promise object representing the resolve/rejection result
+ * @param {string}   email email
+ * @param {array}   domains acceptable domains
  */
-
-/**
- * Middleware for sequelize-graphql-schema hooks
- * @param {ROLES[]} roles 
- * @param {SGSMiddleware} [filter=undefined] - function to filter isAllowed result
- */
-export function isAllowed(roles, filter) {
-    return async (obj, data, context, info) => {
-        if (sys.noAuth)
-            return Promise.resolve();
-
-        if (!context.user) throw Error("User not found");
-        if (!checkLevel(context.user, roles)) throw Error("Permission denied for user:" + context.user.id);
-
-        if (filter) {
-            return await filter(obj, data, context, info);
-        }
-
-        return Promise.resolve();
-    }
+export function validateEmail(email, domains) {
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+   if(emailPattern.test(email)){
+       for(let i in domains){
+           if(email.endsWith(domains[i])) return true;
+       }
+   } 
+   return false;
 }
 
 /**
@@ -222,32 +169,6 @@ export async function cryptPass(password) {
 }
 
 
-/**
- * This filter check if the user set in server context (logged with jwt) is the same
- * subject of the query/mutation. It allows you to avoid fetching/editing of data not
- * owned by the user.
- * 
- * @param {string} [model=undefined] : model name where get the field about user id (field parameter)
- * @param {string} [field=undefined] : you can specify model and field where retrieve userid from mutation data,
- *  otherwise it tries to get from where
- * @returns {SGSMiddleware} Middleware for graphql hooks/api
- */
-export function sameUser(model, field) {
-    return (obj, data, context, info) => {
-        let id;
-        if (model && field && data[model][field]) {
-            id = data[model][field];
-        } else {
-            id = data.where ? (field ? data.where[field] : data.where.id) : data.id;
-        }
-
-        if (sys.noAuth || checkLevel(context.user, [ROLES.ROLE_ADMIN]) || context.user.id == id) {
-            return Promise.resolve();
-        }
-
-        throw Error("Only admin or owner are authorized here!");
-    }
-}
 
 
 /**

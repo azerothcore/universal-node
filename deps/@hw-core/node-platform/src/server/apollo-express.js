@@ -1,3 +1,7 @@
+import https from 'https'
+import http from 'http'
+import fs from 'fs';
+
 import {
     GraphQLSchema,
     printSchema
@@ -34,14 +38,19 @@ import {
     noAuth
 } from "../libs/sysUtil"
 
+const defaultOptions = {
+    getContextUser: null
+}
+
 export default class HwApolloExpress {
     /**
      * 
      * @param {Object} conf 
      * @param {EventManager} evtMgr 
      */
-    constructor(conf, evtMgr) {
+    constructor(conf, evtMgr, options = defaultOptions) {
         this.conf = conf;
+        this.options = options;
 
         this.expressApp = appFactory(conf.express);
 
@@ -53,6 +62,10 @@ export default class HwApolloExpress {
 
         Object.freeze(this.expressApp)
         Object.freeze(this.evtMgr)
+    }
+
+    setOption(name, value) {
+        this.options[name] = value;
     }
 
     setSchemas(schemas) {
@@ -82,17 +95,21 @@ export default class HwApolloExpress {
             context: async ({
                 req
             }) => {
-                var decoded = verifyToken(req);
+                var decoded = verifyToken(req, this.conf.secret);
                 if (decoded) {
-                    var user = await db.models.User.findOne({
-                        where: {
-                            id: decoded.id
+                    if (this.options.getContextUser) {
+                        return {
+                            user: await this.options.getContextUser(decoded.id)
+                        };
+                    } else {
+                        return {
+                            user: await userModel.findOne({
+                                where: {
+                                    id: decoded.id
+                                }
+                            })
                         }
-                    });
-                    //if(!user) throw new Error("Can't find user with id: "+decoded.id);
-                    return {
-                        user
-                    };
+                    }
                 }
 
                 return null;
@@ -112,7 +129,7 @@ export default class HwApolloExpress {
 
         this.server = server;
 
-        Object.freeze(this.server);
+        //Object.freeze(this.server);
 
         this.evtMgr.emit(Events.after_apollo_init, this);
     }
@@ -121,13 +138,31 @@ export default class HwApolloExpress {
         const conf = this.conf;
         this.evtMgr.emit(Events.before_server_start, this);
 
-        this.expressApp.listen({
+        // Create the HTTPS or HTTP server, per configuration
+        var _htserver
+        const isSSL=this.conf.ssl && this.conf.ssl.enabled;
+        if (isSSL) {
+            // Assumes certificates are in .ssl folder from package root. Make sure the files
+            // are secured.
+            _htserver = https.createServer({
+                    key: fs.readFileSync(this.conf.ssl.key),
+                    cert: fs.readFileSync(this.conf.ssl.cert)
+                },
+                this.expressApp
+            )
+        } else {
+            _htserver = http.createServer(this.expressApp);
+        }
+
+        this.server.installSubscriptionHandlers(_htserver)
+
+        _htserver.listen({
             port: conf.serverPort
         }, () => {
             if (noAuth) {
                 console.log("NO AUTH ACTIVATED!")
             }
-            console.log(`🚀 Server ready at http://localhost:${conf.serverPort}${this.server.graphqlPath}`)
+            console.log(`🚀 Server ready at http${isSSL ? 's' : ''}://localhost:${conf.serverPort}${this.server.graphqlPath}`)
             this.evtMgr.emit(Events.after_server_start, this);
         })
     }
