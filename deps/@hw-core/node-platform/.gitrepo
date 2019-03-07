@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://gitlab.com/hw-core/node-platform
+	branch = master
+	commit = ee8019d03a4c2cf5db6822b734e29142493fc84b
+	parent = dc2f6d8544d43a51ecb806d9a067fec08603c7b3
+	method = merge
+	cmdver = 0.4.0
