@@ -10,6 +10,7 @@ import ACL from "@this/src/system/ACL"
 import bcrypt from 'bcrypt';
 
 import config from "@this/conf/conf.js"
+import Sequelize from "sequelize";
 import jsonwebtoken from 'jsonwebtoken';
 import {
     Mailer
@@ -54,14 +55,7 @@ export default function (sequelize, DataTypes) {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        weight: {
-            type: DataTypes.FLOAT,
-            allowNull: false,
-        },
-        height: {
-            type: DataTypes.FLOAT,
-            allowNull: false,
-        },
+       
         picture: {
             type: DataTypes.STRING,
             defaultValue: '',
@@ -71,6 +65,8 @@ export default function (sequelize, DataTypes) {
             type: DataTypes.INTEGER,
             defaultValue: 0
         },
+    
+        /*
         hash: {
             type: DataTypes.STRING,
             defaultValue: '',
@@ -82,10 +78,11 @@ export default function (sequelize, DataTypes) {
         recoveryToken: {
             type: DataTypes.STRING,
             defaultValue: '',
-        },
+        },*/
 
     });
 
+/*
     User.graphql = {
         attributes: {
             exclude: { //changed
@@ -294,6 +291,6 @@ export default function (sequelize, DataTypes) {
         mailer.sendPassword(newPass, user.email);
         return res.send(prefix + " A new temporary password has been sent to your email" + suffix);
     });
-
+*/
     return User;
 };
