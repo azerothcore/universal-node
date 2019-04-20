@@ -19,12 +19,12 @@
     "postinstall": "node ./apps/installer/post-install.js"
   },
   "dependencies": {
-    "@hw-core/node-platform": "file:./deps/@hw-core/node-platform",
+    "@hw-core/node-platform": "file:./deps/hw-core/node-platform",
     "sequelize-graphql-schema": "file:./deps/sequelize-graphql-schema"
   },
   "_moduleAliases": {
     "@this": ".",
-    "@hw-core": "deps/@hw-core"
+    "@hw-core": "deps/hw-core"
   },
   "devDependencies": {
     "eslint": "^5.15.2",
