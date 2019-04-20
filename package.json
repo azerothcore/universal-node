@@ -25,5 +25,9 @@
   "_moduleAliases": {
     "@this": ".",
     "@hw-core": "deps/@hw-core"
+  },
+  "devDependencies": {
+    "eslint": "^5.15.2",
+    "eslint-plugin-jsdoc": "^4.4.2"
   }
 }

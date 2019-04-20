@@ -37,7 +37,7 @@ export default class ACL {
             if (model && field && data[model][field]) {
                 id = data[model][field];
             } else {
-                id = data.where ? (field ? data.where[field] : data.where.id) : data.id;
+                id = data.where ? (field ? data.where[field] : data.where.id) : (data[field] ? data[field] : data.id);
             }
 
             if (sys.noAuth || this.checkLevel(context.user, [this.roles.ROLE_SUPERADMIN]) || context.user.id == id) {

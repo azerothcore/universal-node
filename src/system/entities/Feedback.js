@@ -1,10 +1,9 @@
 import {
-    isAllowed,
-    ROLES,
     applyMiddlewares,
     uploadFile,
-    sameUser
 } from "@hw-core/node-platform/src/libs/apiHelpers";
+
+import ACL from "@this/src/system/ACL"
 
 const reference_folder = "upload/feedbacks/";
 
@@ -49,15 +48,15 @@ export default function (sequelize, DataTypes) {
         }, 
         before: {
             create: applyMiddlewares(
-                isAllowed([ROLES.ROLE_USER], sameUser("Feedback","UserId")),
+                ACL.isAllowed([ACL.roles.ROLE_USER], ACL.sameUser("Feedback","UserId")),
                 uploadFile("Feedback", reference_folder)
             ),
             update: applyMiddlewares(
-                isAllowed([ROLES.ROLE_USER], sameUser("Feedback","UserId")),
+                ACL.isAllowed([ACL.roles.ROLE_USER], ACL.sameUser("Feedback","UserId")),
                 uploadFile("Feedback", reference_folder)
             ),
-            destroy: isAllowed([ROLES.ROLE_ADMIN, ROLES.ROLE_USER]),
-            fetch: isAllowed([ROLES.ROLE_USER, ROLES.ROLE_ADMIN], sameUser(null,"UserId")),
+            destroy: ACL.isAllowed([ACL.roles.ROLE_ADMIN, ACL.roles.ROLE_USER]),
+            fetch: ACL.isAllowed([ACL.roles.ROLE_USER, ACL.roles.ROLE_ADMIN], ACL.sameUser(null,"UserId")),
         },
         types: {
             countInput: {

@@ -1,12 +1,11 @@
 import {
-    isAllowed,
-    sameUser,
-    ROLES,
     cryptPass,
     applyMiddlewares,
     uploadFile,
     random
 } from "@hw-core/node-platform/src/libs/apiHelpers";
+
+import ACL from "@this/src/system/ACL"
 
 import bcrypt from 'bcrypt';
 
@@ -137,7 +136,7 @@ export default function (sequelize, DataTypes) {
             ),
             //add
             update: applyMiddlewares(
-                isAllowed([ROLES.ROLE_USER, ROLES.ROLE_ADMIN], sameUser()),
+                ACL.isAllowed([ACL.roles.ROLE_USER, ACL.roles.ROLE_ADMIN], ACL.sameUser()),
                 async (obj, data, context, info) => {
                         //if(!captcha.verify()) throw new Error("Invalid Captcha"); 
                         if (data.User.password) {
@@ -155,8 +154,8 @@ export default function (sequelize, DataTypes) {
                     },
                     uploadFile("User", reference_folder)
             ),
-            destroy: isAllowed([ROLES.ROLE_ADMIN]),
-            fetch: isAllowed([ROLES.ROLE_USER, ROLES.ROLE_ADMIN], sameUser()),
+            destroy: ACL.isAllowed([ACL.roles.ROLE_ADMIN]),
+            fetch: ACL.isAllowed([ACL.roles.ROLE_USER, ACL.roles.ROLE_ADMIN], ACL.sameUser()),
         },
         extend: {
             create: async (obj, data, context, info) => {

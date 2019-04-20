@@ -1,8 +1,4 @@
-import {
-    isAllowed,
-    ROLES,
-    sameUser
-} from "@hw-core/node-platform/src/libs/apiHelpers";
+import ACL from "@this/src/system/ACL"
 
 /**
  * @instance
@@ -34,12 +30,12 @@ export default function (sequelize, DataTypes) {
 
     UserRecipe.graphql = {
         before: {
-            create: isAllowed([ROLES.ROLE_ADMIN]),
-            update: isAllowed([ROLES.ROLE_ADMIN]),
-            destroy: isAllowed([ROLES.ROLE_ADMIN]),
-            fetch: isAllowed(
-                [ROLES.ROLE_USER, ROLES.ROLE_ADMIN],
-                sameUser(null, "UserId")
+            create: ACL.isAllowed([ACL.roles.ROLE_ADMIN]),
+            update: ACL.isAllowed([ACL.roles.ROLE_ADMIN]),
+            destroy: ACL.isAllowed([ACL.roles.ROLE_ADMIN]),
+            fetch: ACL.isAllowed(
+                [ACL.roles.ROLE_USER, ACL.roles.ROLE_ADMIN],
+                ACL.sameUser(null, "UserId")
             ),
         }
     }

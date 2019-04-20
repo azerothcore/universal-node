@@ -1,10 +1,11 @@
 import {
-    isAllowed,
-    ROLES,
     applyMiddlewares,
     uploadFile,
-    ownDataFilter
 } from "@hw-core/node-platform/src/libs/apiHelpers";
+
+import ACL from "@this/src/system/ACL"
+
+
 const reference_folder = "upload/recipes/";
 
 /**
@@ -57,17 +58,17 @@ export default function (sequelize, DataTypes) {
         },
         before: {
             create: applyMiddlewares(
-                isAllowed([ROLES.ROLE_ADMIN]),
+                ACL.isAllowed([ACL.roles.ROLE_ADMIN]),
                 uploadFile("Recipe", reference_folder)
             ),
             update: applyMiddlewares(
-                isAllowed([ROLES.ROLE_ADMIN]),
+                ACL.isAllowed([ACL.roles.ROLE_ADMIN]),
                 uploadFile("Recipe", reference_folder)
             ),
-            destroy: isAllowed([ROLES.ROLE_ADMIN]),
-            fetch: isAllowed(
-                [ROLES.ROLE_USER, ROLES.ROLE_ADMIN],
-                ownDataFilter(sequelize.models, "UserRecipe", "UserId", "RecipeId")),
+            destroy: ACL.isAllowed([ACL.roles.ROLE_ADMIN]),
+            fetch: ACL.isAllowed(
+                [ACL.roles.ROLE_USER, ACL.roles.ROLE_ADMIN],
+                ACL.ownDataFilter(sequelize.models, "UserRecipe", "UserId", "RecipeId")),
         },
         types: {
             countOut: {
@@ -88,4 +89,4 @@ export default function (sequelize, DataTypes) {
     }
 
     return Recipe;
-};
+}
