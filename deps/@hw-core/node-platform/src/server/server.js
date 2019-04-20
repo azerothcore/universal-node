@@ -78,32 +78,32 @@ export default class Server {
      * LOAD MODULES
      */
     loadModules() {
-        var exclude = this.conf.modules && this.conf.modules.exclude ? this.conf.modules.exclude : []
-        getDirectories(path.resolve(this.conf.modulePath || "./modules/"), (d) => {
+        /*var exclude = this.conf.modules && this.conf.modules.exclude ? this.conf.modules.exclude : []
+        getDirectories(path.resolve(this.conf.modulePath || path.resolve("./modules/")), (d) => {
             return exclude.indexOf(d) < 0
         }).forEach(file => {
             require(file)();
-        });
+        });*/
     }
 
     async dbSync() {
         const db = this.db;
 
-        const stdout = execSync("npm run db:migrate", {
+        /*const stdout = execSync("npm run db:migrate", {
             shell: true
         });
 
         if (stdout) {
             console.log(stdout.toString());
-        }
+        }*/
 
         await db.sequelize.sync();
 
         // this is needed for migration
         // we've to save the information about db sync = first start
-        await db.sequelize.getQueryInterface().upsert("SequelizeMeta", {
-                name: "sync"
-            }, {
+        /*await db.sequelize.getQueryInterface().upsert("SequelizeMeta", {
+            name: "sync"
+        }, {
                 name: "sync"
             }, {
                 name: "sync"
@@ -114,7 +114,7 @@ export default class Server {
                     primaryKey: true,
                     allowNull: false
                 }
-            }), {});
+            }), {});*/
     }
 
     async runServer(withApollo = true) {

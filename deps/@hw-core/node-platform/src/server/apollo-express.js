@@ -58,6 +58,8 @@ export default class HwApolloExpress {
 
         this.evtMgr = evtMgr;
 
+        this.userModel = null;
+
         this.schemas = []
 
         Object.freeze(this.expressApp)
@@ -70,6 +72,10 @@ export default class HwApolloExpress {
 
     setSchemas(schemas) {
         this.schemas = schemas;
+    }
+
+    setUserModel(model) {
+        this.userModel = model;
     }
 
     /**
@@ -92,6 +98,7 @@ export default class HwApolloExpress {
         const server = new ApolloServer({
             cors: true,
             schema: mergedSchema,
+            introspection: true,
             context: async ({
                 req
             }) => {
@@ -103,7 +110,7 @@ export default class HwApolloExpress {
                         };
                     } else {
                         return {
-                            user: await userModel.findOne({
+                            user: await this.userModel.findOne({
                                 where: {
                                     id: decoded.id
                                 }

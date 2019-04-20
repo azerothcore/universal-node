@@ -1,6 +1,6 @@
 import "../defs"
 import jwt from "jsonwebtoken";
-import bcrypt from 'bcrypt';
+//import bcrypt from 'bcrypt';
 
 import toArray from 'stream-to-array';
 import util from "util";

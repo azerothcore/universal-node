@@ -1,6 +1,13 @@
 import "../defs"
 import * as sys from "./sysUtil"
 
+/**
+ * @typedef {number} ROLES_ENUM
+ **/
+
+/**
+ * @enum {ROLES_ENUM}
+ */
 export const ROLES = {
     ROLE_USER: 0,
     ROLE_ADMIN: 1,
@@ -50,7 +57,7 @@ export default class ACL {
 
     /**
      * Middleware for sequelize-graphql-schema hooks
-     * @param {ROLES[]} roles 
+     * @param {ROLES[]|ROLES_ENUM} roles 
      * @param {SGSMiddleware} [filter=undefined] - function to filter isAllowed result
      */
     isAllowed(roles, filter) {
